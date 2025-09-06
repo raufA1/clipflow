@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="az"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ClipFlow — Config</title>
+<style>body{font-family:system-ui,Roboto,Arial,sans-serif;margin:20px}fieldset{border:1px solid #ddd;padding:12px;border-radius:8px;margin:10px 0}label{display:block;margin:6px 0 4px;font-weight:600}input,select{padding:8px;border:1px solid #ccc;border-radius:6px;width:100%}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.btn{background:#0d6efd;color:#fff;border:0;padding:10px 14px;border-radius:8px;cursor:pointer}.flash{background:#e8f5e9;border:1px solid #a5d6a7;padding:8px 12px;border-radius:6px;margin:10px 0}</style>
+</head>
+<body><h1>ClipFlow — Konfiqurasiya</h1>
+{% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}{% for c,m in messages %}<div class="flash">{{ m }}</div>{% endfor %}{% endif %}{% endwith %}
+<form method="post">
+<fieldset><legend>Preset</legend><div class="row"><div><label>Profil</label><select name="preset"><option value="">— seç —</option><option value="safe">Safe</option><option value="aggressive">Aggressive highlights</option><option value="silent_captions">Silent captions only</option></select></div></div></fieldset>
+<fieldset><legend>Ümumi</legend>
+<div class="row"><div><label>Dil</label><select name="language">
+<option value="az" {% if cfg.language=='az' %}selected{% endif %}>Azərbaycan</option>
+<option value="en" {% if cfg.language=='en' %}selected{% endif %}>English</option>
+<option value="ru" {% if cfg.language=='ru' %}selected{% endif %}>Русский</option>
+</select></div>
+<div><label><input type="checkbox" name="enable_highlights" {% if cfg.enable_highlights %}checked{% endif %}> Uzun videolarda highlight</label></div></div>
+<div class="row"><div><label>Highlight threshold (s)</label><input type="number" name="highlight_threshold_sec" value="{{ cfg.highlight_threshold_sec }}"></div>
+<div><label>Highlight hədəfləri</label><input type="text" name="highlight_targets_sec" value="{{ cfg.highlight_targets_sec|join(',') }}"></div></div>
+</fieldset>
+<fieldset><legend>AI Caption</legend>
+<div class="row"><div><label><input type="checkbox" name="ai_enabled" {% if cfg.ai.enabled %}checked{% endif %}> Aktiv</label></div>
+<div><label>Provayder</label><input type="text" name="ai_provider" value="{{ cfg.ai.provider }}"></div></div>
+<div class="row"><div><label>Model</label><input type="text" name="ai_model" value="{{ cfg.ai.model }}"></div>
+<div><label>Maks. token</label><input type="number" name="ai_max_tokens" value="{{ cfg.ai.max_tokens }}"></div></div>
+<div class="row"><div><label>Temperature</label><input type="text" name="ai_temperature" value="{{ cfg.ai.temperature }}"></div></div>
+</fieldset>
+<fieldset><legend>Musiqi</legend>
+<div class="row"><div><label>Rejim</label><select name="music_mode">
+<option value="safe" {% if cfg.music.mode=='safe' %}selected{% endif %}>Safe</option>
+<option value="assist" {% if cfg.music.mode=='assist' %}selected{% endif %}>Assist</option>
+</select></div>
+<div><label>Fallback gain</label><input type="text" name="fallback_gain" value="{{ cfg.music.fallback_gain }}"></div></div>
+</fieldset>
+<button class="btn" type="submit">Yadda saxla</button> <a class="btn" style="background:#6c757d;text-decoration:none" href="/logs">Loglara bax</a>
+</form>
+</body></html>

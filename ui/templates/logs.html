@@ -1,0 +1,6 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Logs</title>
+<style>body{font-family:system-ui,Arial;margin:20px}table{border-collapse:collapse;width:100%}th,td{border-bottom:1px solid #eee;padding:8px;text-align:left}code{font-size:12px}</style>
+</head><body><h2>Hadisə jurnalı</h2>
+<table><tr><th>Zaman</th><th>Növ</th><th>Məlumat</th></tr>
+{% for r in rows %}<tr><td>{{ r.ts }}</td><td>{{ r.type }}</td><td><code>{{ r|tojson }}</code></td></tr>{% endfor %}
+</table><p><a href="/">← geri</a></p></body></html>
