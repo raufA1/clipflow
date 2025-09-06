@@ -1,0 +1,2 @@
+- YOLOv8 tracking
+- Full analytics APIs

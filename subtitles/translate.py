@@ -1,1 +1,1 @@
-# translate stub
+print('subtitle.az.srt')

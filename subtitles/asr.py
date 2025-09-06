@@ -1,1 +1,1 @@
-# asr stub
+print('subtitle.srt')
