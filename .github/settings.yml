@@ -1,0 +1,16 @@
+repository:
+  name: clipflow
+  description: "🎬 ClipFlow -- AI-powered Shorts/Reels automation: analyze → captions → highlights → render → publish"
+  homepage: "https://github.com/raufA1/clipflow"
+  topics: 
+    - ai
+    - automation
+    - video
+    - youtube-shorts
+    - tiktok
+    - instagram-reels
+    - content-automation
+    - clipflow
+    - python
+    - flask
+    - github-actions
