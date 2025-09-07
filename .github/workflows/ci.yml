@@ -57,7 +57,7 @@ jobs:
     
     - name: Test with pytest
       run: |
-        pytest tests/ -v --cov=. --cov-report=xml --cov-report=term-missing
+        pytest tests/ -v --cov=clipflow_main --cov=core --cov=services --cov-report=xml --cov-report=term-missing
       env:
         TELEGRAM_BOT_TOKEN: "test_token"
     

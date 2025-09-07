@@ -10,6 +10,9 @@ import os
 from pathlib import Path
 
 # Import ClipFlow components
+import sys
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 from clipflow_main import ClipFlowConfig, ClipFlowOrchestrator, ConfigManager
 
 
