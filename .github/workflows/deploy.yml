@@ -1,0 +1,126 @@
+name: Deploy to Production
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: 
+      name: ${{ github.event.inputs.environment || 'production' }}
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Create config from secrets
+      run: |
+        cat > config.json << EOF
+        {
+          "telegram_bot_token": "${{ secrets.TELEGRAM_BOT_TOKEN }}",
+          "timezone": "${{ vars.CLIPFLOW_TIMEZONE || 'Asia/Baku' }}",
+          "platform_credentials": {
+            "youtube": {
+              "client_id": "${{ secrets.YOUTUBE_CLIENT_ID }}",
+              "client_secret": "${{ secrets.YOUTUBE_CLIENT_SECRET }}",
+              "access_token": "${{ secrets.YOUTUBE_ACCESS_TOKEN }}"
+            },
+            "instagram": {
+              "access_token": "${{ secrets.INSTAGRAM_ACCESS_TOKEN }}",
+              "app_id": "${{ secrets.INSTAGRAM_APP_ID }}",
+              "app_secret": "${{ secrets.INSTAGRAM_APP_SECRET }}"
+            },
+            "tiktok": {
+              "client_key": "${{ secrets.TIKTOK_CLIENT_KEY }}",
+              "client_secret": "${{ secrets.TIKTOK_CLIENT_SECRET }}",
+              "access_token": "${{ secrets.TIKTOK_ACCESS_TOKEN }}"
+            }
+          },
+          "default_brand_config": {
+            "name": "${{ vars.BRAND_NAME || 'ClipFlow' }}",
+            "primary_color": "${{ vars.BRAND_PRIMARY_COLOR || '#1DA1F2' }}",
+            "secondary_color": "${{ vars.BRAND_SECONDARY_COLOR || '#14171A' }}",
+            "watermark_text": "${{ vars.BRAND_WATERMARK || 'Created with ClipFlow' }}"
+          }
+        }
+        EOF
+    
+    - name: Deploy to Server (SSH)
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.DEPLOY_HOST }}
+        username: ${{ secrets.DEPLOY_USER }}
+        key: ${{ secrets.DEPLOY_SSH_KEY }}
+        port: ${{ secrets.DEPLOY_PORT || 22 }}
+        script: |
+          cd /opt/clipflow
+          
+          # Backup current version
+          sudo systemctl stop clipflow || true
+          cp -r . ../clipflow-backup-$(date +%Y%m%d-%H%M%S) || true
+          
+          # Pull latest code
+          git fetch --all
+          git reset --hard origin/main
+          
+          # Update dependencies
+          source venv/bin/activate
+          pip install -r requirements.txt
+          
+          # Restart service
+          sudo systemctl start clipflow
+          sudo systemctl status clipflow
+          
+          # Health check
+          sleep 10
+          python health_check.py || exit 1
+          
+          echo "✅ Deployment successful!"
+    
+    - name: Deploy to Docker Swarm
+      if: vars.DEPLOY_METHOD == 'docker'
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.DEPLOY_HOST }}
+        username: ${{ secrets.DEPLOY_USER }}
+        key: ${{ secrets.DEPLOY_SSH_KEY }}
+        script: |
+          # Update Docker stack
+          docker stack deploy -c docker-compose.prod.yml clipflow
+          
+          # Wait for rollout
+          sleep 30
+          
+          # Health check
+          docker service ps clipflow_clipflow --no-trunc
+          
+          echo "✅ Docker deployment successful!"
+    
+    - name: Notify Deployment
+      if: always()
+      uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        channel: '#deployments'
+        webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+        fields: repo,message,commit,author,action,eventName,ref,workflow

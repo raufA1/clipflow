@@ -1,0 +1,59 @@
+# ClipFlow - Universal Content Automation Platform
+# Core dependencies
+
+# Telegram Bot
+python-telegram-bot==20.7
+python-dotenv==1.0.0
+
+# HTTP Client
+httpx==0.25.2
+aiohttp==3.9.1
+aiofiles==23.2.1
+
+# Image Processing
+Pillow==10.1.0
+
+# Video Processing (requires FFmpeg installed)
+ffmpeg-python==0.2.0
+
+# Audio Processing
+wave==0.0.2
+
+# Data Processing
+numpy==1.24.3
+pandas==2.0.3
+
+# Database
+sqlite3  # Built into Python
+
+# Configuration
+PyYAML==6.0.1
+
+# General utilities
+requests==2.31.0
+pathlib  # Built into Python
+dataclasses  # Built into Python (3.7+)
+asyncio  # Built into Python
+logging  # Built into Python
+json  # Built into Python
+csv  # Built into Python
+datetime  # Built into Python
+typing  # Built into Python
+collections  # Built into Python
+statistics  # Built into Python
+os  # Built into Python
+subprocess  # Built into Python
+math  # Built into Python
+random  # Built into Python
+hashlib  # Built into Python
+
+# Optional: for development
+pytest==7.4.3
+pytest-asyncio==0.21.1
+black==23.9.1
+flake8==6.1.0
+
+# Platform-specific (install as needed)
+# google-api-python-client==2.108.0  # For YouTube
+# google-auth-oauthlib==1.1.0       # For YouTube OAuth
+# facebook-sdk==3.1.0                # For Instagram/Facebook
