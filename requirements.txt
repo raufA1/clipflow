@@ -3,3 +3,4 @@ uvicorn
 ffmpeg-python
 requests
 PyYAML
+python-telegram-bot
