@@ -1,6 +1,18 @@
-# 🎬 ClipFlow - Universal Content Automation Platform
+<div align="center">
 
-**AI-powered content creation and distribution for all social media platforms**
+![ClipFlow Logo](assets/clipflow_logo.png)
+
+# 🚀 ClipFlow - Universal Content Automation Platform
+
+> **AI-Powered Multi-Platform Content Publishing**  
+> Transform any content (video, photo, text, audio) into optimized posts across YouTube, Instagram, TikTok, and more!
+
+[![GitHub Stars](https://img.shields.io/github/stars/raufA1/clipflow?style=for-the-badge)](https://github.com/raufA1/clipflow/stargazers)
+[![License](https://img.shields.io/github/license/raufA1/clipflow?style=for-the-badge)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.8+-blue?style=for-the-badge&logo=python)](https://python.org)
+[![Telegram](https://img.shields.io/badge/Telegram-Bot-26A5E4?style=for-the-badge&logo=telegram)](https://t.me/clipflow_updates)
+
+</div>
 
 ClipFlow is a comprehensive automation platform that transforms any content (video, image, text, audio) into optimized posts for YouTube, Instagram, TikTok, Twitter, and LinkedIn. Control everything through a simple Telegram bot interface.
 
@@ -65,7 +77,20 @@ ClipFlow/
 - Telegram Bot Token ([Get from @BotFather](https://t.me/botfather))
 - Platform API credentials (optional but recommended)
 
-### 🐳 Docker Installation (Recommended)
+### 🚀 GitHub Actions Deployment (Recommended)
+
+**No server needed! Run ClipFlow directly on GitHub:**
+
+1. **[Fork this repository](https://github.com/raufA1/clipflow/fork)**
+2. **Add secrets**: Settings → Secrets → Actions
+   - `TELEGRAM_BOT_TOKEN` (required - from @BotFather)
+   - YouTube, Instagram, TikTok tokens (optional)
+3. **Deploy**: Actions → "🚀 GitHub Deploy ClipFlow" → Run workflow
+4. **Start using**: Open Telegram → Send `/start` to your bot
+
+📖 **Guides**: [GitHub Deploy](GITHUB_DEPLOYMENT.md) • [All API Tokens](SECRETS_SETUP.md)
+
+### 🐳 Docker Installation
 
 1. **Clone and start with Docker**
 ```bash
@@ -129,9 +154,10 @@ nano .env
 python clipflow_main.py
 ```
 
-### 🔑 API Keys Setup
+### 🔑 Platform Setup
 
-Check [SECRETS.md](SECRETS.md) for detailed guide on getting API keys for each platform.
+- **Full Setup**: [SETUP_GUIDE.md](SETUP_GUIDE.md) - Complete configuration guide
+- **GitHub Deploy**: [GITHUB_DEPLOYMENT.md](GITHUB_DEPLOYMENT.md) - Run on GitHub Actions (no server needed!)
 
 ## ⚙️ Configuration
 
@@ -341,6 +367,14 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Made with ❤️ for content creators worldwide**
+<div align="center">
+
+---
+
+**Made with ❤️ by the ClipFlow Team**
+
+[⭐ Star on GitHub](https://github.com/raufA1/clipflow) • [📚 Documentation](SETUP_GUIDE.md) • [💬 Community](https://github.com/raufA1/clipflow/discussions) • [🐛 Report Issues](https://github.com/raufA1/clipflow/issues)
 
 *ClipFlow - Because your content deserves to be everywhere* 🌍
+
+</div>

@@ -1,0 +1,346 @@
+name: 🚀 GitHub Deploy ClipFlow
+
+on:
+  workflow_dispatch:
+    inputs:
+      service_action:
+        description: 'Service Action'
+        required: true
+        default: 'deploy'
+        type: choice
+        options:
+        - deploy
+        - restart
+        - stop
+        - status
+      debug_mode:
+        description: 'Enable debug logging'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  github-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+    - name: 📦 Checkout ClipFlow
+      uses: actions/checkout@v4
+    
+    - name: 🐍 Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: 🎬 Install FFmpeg
+      run: |
+        sudo apt-get update -qq
+        sudo apt-get install -y ffmpeg
+        ffmpeg -version | head -1
+    
+    - name: 📚 Cache Dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: clipflow-${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          clipflow-${{ runner.os }}-pip-
+    
+    - name: 📦 Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip list | grep -E "(telegram|requests|aiohttp|Pillow)"
+    
+    - name: ⚙️ Configure ClipFlow
+      run: |
+        echo "Creating ClipFlow configuration..."
+        
+        # Create .env from GitHub Secrets
+        cat > .env << EOF
+        # === ClipFlow GitHub Deployment ===
+        TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
+        
+        # YouTube API
+        YOUTUBE_CLIENT_ID=${{ secrets.YOUTUBE_CLIENT_ID }}
+        YOUTUBE_CLIENT_SECRET=${{ secrets.YOUTUBE_CLIENT_SECRET }}
+        YOUTUBE_ACCESS_TOKEN=${{ secrets.YOUTUBE_ACCESS_TOKEN }}
+        
+        # Instagram API
+        INSTAGRAM_ACCESS_TOKEN=${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+        INSTAGRAM_APP_ID=${{ secrets.INSTAGRAM_APP_ID }}
+        INSTAGRAM_APP_SECRET=${{ secrets.INSTAGRAM_APP_SECRET }}
+        
+        # TikTok API
+        TIKTOK_CLIENT_KEY=${{ secrets.TIKTOK_CLIENT_KEY }}
+        TIKTOK_CLIENT_SECRET=${{ secrets.TIKTOK_CLIENT_SECRET }}
+        TIKTOK_ACCESS_TOKEN=${{ secrets.TIKTOK_ACCESS_TOKEN }}
+        
+        # ClipFlow Settings
+        CLIPFLOW_TIMEZONE=Asia/Baku
+        CLIPFLOW_DATA_DIR=data
+        CLIPFLOW_TEMP_DIR=temp
+        CLIPFLOW_DEBUG=${{ github.event.inputs.debug_mode == 'true' && 'true' || 'false' }}
+        CLIPFLOW_GITHUB_DEPLOY=true
+        EOF
+        
+        # Create necessary directories
+        mkdir -p data temp assets config logs
+        chmod 755 data temp logs
+        
+        echo "✅ Configuration completed"
+    
+    - name: 🔍 System Validation
+      run: |
+        echo "🔍 Running ClipFlow system validation..."
+        
+        # Run development setup validator
+        python3 setup_dev.py
+        
+        # Test core configuration
+        python3 -c "
+        from clipflow_main import ConfigManager
+        
+        try:
+            config = ConfigManager.load_from_env()
+            print(f'✅ Configuration loaded')
+            print(f'📱 Bot token: {\"Configured\" if config.telegram_bot_token else \"Missing\"}')
+            print(f'🌐 Platforms: {len(config.platform_credentials)} configured')
+            
+            # List configured platforms
+            for platform in config.platform_credentials.keys():
+                print(f'   ✓ {platform.title()}')
+                
+        except Exception as e:
+            print(f'❌ Configuration error: {e}')
+            exit(1)
+        "
+    
+    - name: 🤖 Service Management
+      run: |
+        case "${{ github.event.inputs.service_action }}" in
+          "deploy")
+            echo "🚀 Deploying ClipFlow service..."
+            
+            # Start ClipFlow in background
+            nohup python3 clipflow_main.py > logs/clipflow.log 2>&1 &
+            CLIPFLOW_PID=$!
+            echo $CLIPFLOW_PID > clipflow.pid
+            echo "Started ClipFlow with PID: $CLIPFLOW_PID"
+            
+            # Give service time to initialize
+            sleep 15
+            ;;
+            
+          "restart")
+            echo "🔄 Restarting ClipFlow service..."
+            if [ -f clipflow.pid ]; then
+              PID=$(cat clipflow.pid)
+              if kill -0 $PID 2>/dev/null; then
+                kill $PID
+                echo "Stopped process $PID"
+                sleep 5
+              fi
+            fi
+            
+            # Start again
+            nohup python3 clipflow_main.py > logs/clipflow.log 2>&1 &
+            echo $! > clipflow.pid
+            sleep 15
+            ;;
+            
+          "stop")
+            echo "⏹️ Stopping ClipFlow service..."
+            if [ -f clipflow.pid ]; then
+              PID=$(cat clipflow.pid)
+              if kill -0 $PID 2>/dev/null; then
+                kill $PID
+                echo "✅ ClipFlow stopped"
+              else
+                echo "⚠️ ClipFlow was not running"
+              fi
+            fi
+            exit 0
+            ;;
+            
+          "status")
+            echo "📊 Checking ClipFlow status..."
+            ;;
+        esac
+    
+    - name: 🏥 Health Check
+      if: ${{ github.event.inputs.service_action != 'stop' }}
+      run: |
+        echo "🏥 Running ClipFlow health check..."
+        
+        # Check if process is running
+        if [ -f clipflow.pid ]; then
+          PID=$(cat clipflow.pid)
+          if kill -0 $PID 2>/dev/null; then
+            echo "✅ ClipFlow process running (PID: $PID)"
+          else
+            echo "❌ ClipFlow process not found"
+            exit 1
+          fi
+        else
+          echo "❌ ClipFlow PID file not found"
+          exit 1
+        fi
+        
+        # Test Telegram bot connectivity
+        echo "🤖 Testing Telegram bot connection..."
+        python3 -c "
+        import os, asyncio
+        from telegram import Bot
+        
+        async def test_bot():
+            token = os.getenv('TELEGRAM_BOT_TOKEN')
+            if not token:
+                print('❌ TELEGRAM_BOT_TOKEN not configured')
+                return False
+            
+            try:
+                bot = Bot(token)
+                me = await bot.get_me()
+                print(f'✅ Bot connected: @{me.username}')
+                print(f'📝 Bot name: {me.first_name}')
+                print(f'🆔 Bot ID: {me.id}')
+                return True
+            except Exception as e:
+                print(f'❌ Bot connection failed: {e}')
+                return False
+        
+        result = asyncio.run(test_bot())
+        exit(0 if result else 1)
+        "
+        
+        # Test core system health
+        echo "💚 Testing system health..."
+        python3 -c "
+        from clipflow_main import ConfigManager, ClipFlowOrchestrator
+        import asyncio
+        
+        async def health_check():
+            try:
+                config = ConfigManager.load_from_env()
+                orchestrator = ClipFlowOrchestrator(config)
+                health = await orchestrator.health_check()
+                
+                print('💚 System Health Report:')
+                print(f'   Overall: {health[\"overall_status\"]}')
+                
+                components = health.get('components', {})
+                for component, status in components.items():
+                    if isinstance(status, dict):
+                        for sub_comp, sub_status in status.items():
+                            icon = '✅' if sub_status else '❌'
+                            print(f'   {icon} {component}.{sub_comp}')
+                    else:
+                        icon = '✅' if status else '❌'
+                        print(f'   {icon} {component}')
+                        
+                return health['overall_status'] == 'healthy'
+            except Exception as e:
+                print(f'❌ Health check failed: {e}')
+                return False
+        
+        result = asyncio.run(health_check())
+        exit(0 if result else 1)
+        "
+    
+    - name: 📊 Generate Deployment Report
+      if: always()
+      run: |
+        echo "📊 Generating deployment report..."
+        
+        # Create deployment summary
+        cat > deployment_report.md << EOF
+        # 🚀 ClipFlow GitHub Deployment Report
+        
+        **Action:** ${{ github.event.inputs.service_action }}  
+        **Timestamp:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')  
+        **Commit:** ${{ github.sha }}  
+        **Actor:** ${{ github.actor }}  
+        **Debug Mode:** ${{ github.event.inputs.debug_mode }}  
+        
+        ## 📋 Configuration Status
+        EOF
+        
+        # Check configuration status
+        python3 -c "
+        import os
+        
+        secrets = {
+            'TELEGRAM_BOT_TOKEN': 'Telegram Bot',
+            'YOUTUBE_CLIENT_ID': 'YouTube API',
+            'INSTAGRAM_ACCESS_TOKEN': 'Instagram API', 
+            'TIKTOK_CLIENT_KEY': 'TikTok API'
+        }
+        
+        for secret, name in secrets.items():
+            status = '✅' if os.getenv(secret) else '❌'
+            print(f'- {status} {name}')
+        " >> deployment_report.md
+        
+        # Add service status
+        cat >> deployment_report.md << EOF
+        
+        ## 🤖 Service Status
+        EOF
+        
+        if [ -f clipflow.pid ] && kill -0 $(cat clipflow.pid) 2>/dev/null; then
+          echo "- ✅ ClipFlow service running (PID: $(cat clipflow.pid))" >> deployment_report.md
+        else
+          echo "- ❌ ClipFlow service not running" >> deployment_report.md
+        fi
+        
+        # Add next steps
+        cat >> deployment_report.md << EOF
+        
+        ## 📱 Next Steps
+        
+        1. **Open Telegram** and search for your bot
+        2. **Send \`/start\`** to initialize ClipFlow
+        3. **Upload content** (video, photo, text, audio)
+        4. **Select platforms** and let AI optimize your content
+        5. **Track performance** with built-in analytics
+        
+        ## 🔗 Quick Links
+        
+        - 📖 [Setup Guide](SETUP_GUIDE.md)
+        - 🐛 [Report Issues](https://github.com/raufA1/clipflow/issues)
+        - 💬 [Discussions](https://github.com/raufA1/clipflow/discussions)
+        - 📊 Service logs available in artifacts
+        
+        ---
+        *ClipFlow - Universal Content Automation Platform* 🌍
+        EOF
+        
+        # Display report
+        cat deployment_report.md
+        
+        # Add to GitHub step summary
+        cat deployment_report.md >> $GITHUB_STEP_SUMMARY
+    
+    - name: 📁 Upload Logs & Artifacts
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: clipflow-deployment-${{ github.run_id }}
+        path: |
+          logs/
+          deployment_report.md
+          .env
+          clipflow.pid
+        retention-days: 7
+    
+    - name: 💌 Deployment Notification
+      if: ${{ github.event.inputs.service_action == 'deploy' && success() }}
+      run: |
+        echo "🎉 ClipFlow successfully deployed on GitHub Actions!"
+        echo ""
+        echo "🤖 Your Telegram bot is now active and ready to use."
+        echo "📱 Open Telegram, find your bot, and send /start to begin!"
+        echo ""
+        echo "✨ Start automating your content across all social platforms! ✨"

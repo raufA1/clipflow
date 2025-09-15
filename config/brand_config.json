@@ -1,0 +1,132 @@
+{
+  "brand_name": "ClipFlow",
+  "tagline": "Universal Content Automation Platform",
+  "logo": {
+    "path": "assets/clipflow_logo.png",
+    "dark_mode_path": "assets/clipflow_logo_dark.png",
+    "icon_path": "assets/clipflow_icon.png"
+  },
+  "watermark": {
+    "enabled": true,
+    "position": "bottom_right",
+    "opacity": 0.7,
+    "margin": 20,
+    "scale": 0.15
+  },
+  "colors": {
+    "primary": "#6366F1",
+    "secondary": "#8B5CF6", 
+    "accent": "#F59E0B",
+    "background": "#F8FAFC",
+    "dark_background": "#0F172A",
+    "text": "#1E293B",
+    "text_secondary": "#64748B",
+    "success": "#10B981",
+    "warning": "#F59E0B",
+    "error": "#EF4444"
+  },
+  "typography": {
+    "font_family_primary": "Inter",
+    "font_family_secondary": "JetBrains Mono",
+    "font_weights": {
+      "light": 300,
+      "regular": 400,
+      "medium": 500,
+      "semibold": 600,
+      "bold": 700
+    },
+    "font_sizes": {
+      "xs": 12,
+      "sm": 14,
+      "base": 16,
+      "lg": 18,
+      "xl": 20,
+      "2xl": 24,
+      "3xl": 32
+    }
+  },
+  "visual_elements": {
+    "border_radius": {
+      "small": 4,
+      "medium": 8,
+      "large": 12,
+      "extra_large": 16
+    },
+    "shadows": {
+      "small": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+      "medium": "0 4px 6px -1px rgb(0 0 0 / 0.1)",
+      "large": "0 10px 15px -3px rgb(0 0 0 / 0.1)"
+    },
+    "gradients": {
+      "primary": "linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)",
+      "secondary": "linear-gradient(135deg, #F59E0B 0%, #EF4444 100%)",
+      "neutral": "linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 100%)"
+    }
+  },
+  "platform_themes": {
+    "youtube": {
+      "primary_color": "#FF0000",
+      "background": "#000000",
+      "text": "#FFFFFF"
+    },
+    "instagram": {
+      "primary_color": "#E4405F",
+      "background": "#FFFFFF", 
+      "text": "#262626"
+    },
+    "tiktok": {
+      "primary_color": "#000000",
+      "secondary_color": "#FF0050",
+      "background": "#FFFFFF",
+      "text": "#161823"
+    },
+    "twitter": {
+      "primary_color": "#1DA1F2",
+      "background": "#FFFFFF",
+      "text": "#14171A"
+    },
+    "linkedin": {
+      "primary_color": "#0077B5", 
+      "background": "#FFFFFF",
+      "text": "#000000"
+    }
+  },
+  "content_templates": {
+    "video_overlay": {
+      "template_path": "templates/video_overlay.html",
+      "default_duration": 3,
+      "animation": "fadeInOut"
+    },
+    "image_frame": {
+      "template_path": "templates/image_frame.html",
+      "border_width": 2,
+      "corner_style": "rounded"
+    },
+    "text_card": {
+      "template_path": "templates/text_card.html",
+      "padding": 20,
+      "max_width": 600
+    }
+  },
+  "social_links": {
+    "website": "https://clipflow.io",
+    "github": "https://github.com/raufA1/clipflow",
+    "telegram": "https://t.me/clipflow_updates",
+    "twitter": "https://twitter.com/clipflow_io",
+    "discord": "https://discord.gg/clipflow"
+  },
+  "legal": {
+    "copyright": "© 2024 ClipFlow. All rights reserved.",
+    "privacy_policy": "https://clipflow.io/privacy",
+    "terms_of_service": "https://clipflow.io/terms",
+    "license": "MIT"
+  },
+  "features": {
+    "ai_optimization": true,
+    "multi_platform_publishing": true,
+    "smart_scheduling": true,
+    "analytics_dashboard": true,
+    "brand_consistency": true,
+    "content_templates": true
+  }
+}

@@ -1,0 +1,10 @@
+youtube_shorts:
+  caption_max: 100
+  hashtags_max: 5
+  allow_music: true
+tiktok:
+  caption_max: 2200
+  hashtags_max: 10
+instagram_reels:
+  caption_max: 2200
+  hashtags_max: 10

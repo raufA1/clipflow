@@ -26,6 +26,7 @@ from core.publishers.instagram_publisher import InstagramPublisher
 from core.publishers.tiktok_publisher import TikTokPublisher
 from core.scheduler.smart_scheduler import SmartScheduler, PostMetrics
 from core.analytics.metrics_collector import MetricsCollector, ContentMetrics, AnalyticsDashboard
+from core.brand import BrandManager
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +84,9 @@ class ClipFlowOrchestrator:
         self.scheduler = SmartScheduler(config.data_dir, config.timezone)
         self.metrics_collector = MetricsCollector(config.data_dir)
         self.analytics_dashboard = AnalyticsDashboard(self.metrics_collector)
+        
+        # Initialize brand manager
+        self.brand_manager = BrandManager()
         
         # Initialize bot (will be started separately)
         self.bot = None
