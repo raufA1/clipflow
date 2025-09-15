@@ -1,2 +1,5 @@
 fastapi
 uvicorn
+ffmpeg-python
+requests
+PyYAML

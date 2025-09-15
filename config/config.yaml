@@ -1,0 +1,8 @@
+language: az
+ai:
+  model: gpt-4o-mini
+subtitles:
+  enabled: false
+  target_languages: [az, en, ru]
+detector:
+  type: heuristic
